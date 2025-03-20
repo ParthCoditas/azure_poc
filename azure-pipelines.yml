@@ -10,7 +10,7 @@ steps:
 
 # Step 2: Create an artifact
 - script: |
-    echo "Hello World!" > artifact.txt
+    echo "Hello World!" > artifact2.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
     mv artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
