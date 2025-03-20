@@ -7,9 +7,9 @@ steps:
 - checkout: self  # Explicit checkout step
 # Step 2: Create an artifact
 - script: |
-    echo "Hello World!" > artifact.txt
+    echo "Hello World!" > artifact.txt5
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact.txt5 $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
@@ -27,7 +27,7 @@ steps:
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+      $(Build.ArtifactStagingDirectory)/artifact.txt5 sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt5
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
