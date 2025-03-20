@@ -21,9 +21,8 @@ steps:
     publishLocation: 'Container'
 
 - script: |
-    sudo apt update && sudo apt install -y sshpass  # Ensure sshpass is installed
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):/home/sftpuser/
+      $(Pipeline.Workspace)/my-artifact/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
