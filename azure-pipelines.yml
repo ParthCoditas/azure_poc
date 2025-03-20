@@ -7,9 +7,9 @@ steps:
 - checkout: self  # Explicit checkout step
 # Step 2: Create an artifact
 - script: |
-    echo "Hello World!" > artifact.txt
+    echo "Hello World!" > artifact3.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact3.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
@@ -27,7 +27,7 @@ steps:
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+      $(Build.ArtifactStagingDirectory)/artifact3.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact3.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
@@ -35,5 +35,5 @@ steps:
 # Step 6: Copy artifact from SFTP VM to deploymachine VM
 - script: |
     sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no \
-      /sftp/uploads/artifact.txt coditas@deploymachine:/home/coditas/
+      /sftp/uploads/artifact3.txt coditas@deploymachine:/home/coditas/
   displayName: 'Copy Artifact to deploymachine VM'
