@@ -38,3 +38,34 @@ steps:
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+
+# Step 6: Download `.pem` file from Azure DevOps Secure Files
+- task: DownloadSecureFile@1
+  name: targetPemFile
+  inputs:
+    secureFile: 'target_ssh_private_key'  # Name of the uploaded .pem file
+
+# Step 7: Copy artifact from SFTP to Target Ubuntu Server
+- script: |
+    echo "Using PEM file to SSH into Target Ubuntu Server..."
+
+    # Move the PEM file to the correct location and set permissions
+    mv $(targetPemFile.secureFilePath) private_key.pem
+    chmod 600 private_key.pem
+
+    # SSH into the target Ubuntu server and copy the file from SFTP
+    ssh -i private_key.pem -o StrictHostKeyChecking=no $(TARGET_USER)@$(TARGET_SERVER_IP) << EOF
+      sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << EOC
+        cd uploads
+        get artifact.txt /home/ubuntu/artifact.txt
+      EOC
+    EOF
+
+    # Clean up the private key
+    rm -f private_key.pem
+  displayName: 'Copy from SFTP Server to Target Ubuntu Server'
+  env:
+    SFTP_SERVER_IP: $(sftp_server_ip)
+    TARGET_USER: $(target_server_user)
+    TARGET_SERVER_IP: $(target_server_ip)
+
