@@ -21,9 +21,12 @@ steps:
     publishLocation: 'Container'
 
 - script: |
-    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Pipeline.Workspace)/my-artifact/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+    sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
+    put $(Pipeline.Workspace)/my-artifact/artifact.txt uploads/artifact.txt
+    bye
+    EOF
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+
