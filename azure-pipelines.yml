@@ -32,3 +32,8 @@ steps:
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+# Step 6: Copy artifact from SFTP VM to deploymachine VM
+- script: |
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no \
+      /sftp/uploads/artifact.txt coditas@deploymachine:/home/coditas/
+  displayName: 'Copy Artifact to deploymachine VM'
