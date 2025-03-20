@@ -10,9 +10,9 @@ steps:
 
 # Step 2: Create an artifact
 - script: |
-    echo "Hello World!" > artifact2.txt
+    echo "Hello World!" > artifact2.txt 
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact2.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 
 # Step 3: Publish the artifact
@@ -33,7 +33,7 @@ steps:
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+      $(Build.ArtifactStagingDirectory)/artifact2.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
@@ -50,11 +50,12 @@ steps:
 - script: |
     chmod 600 $(Agent.TempDirectory)/serverdeployment_key.pem
     scp -i $(Agent.TempDirectory)/serverdeployment_key.pem -o StrictHostKeyChecking=no \
-      sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt $(Agent.TempDirectory)/artifact.txt
+      sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt $(Agent.TempDirectory)/artifact2.txt
     scp -i $(Agent.TempDirectory)/serverdeployment_key.pem -o StrictHostKeyChecking=no \
-      $(Agent.TempDirectory)/artifact.txt $(TARGET_SERVER_USER)@$(TARGET_SERVER_IP):/home/$(TARGET_SERVER_USER)/artifact.txt
+      $(Agent.TempDirectory)/artifact2.txt $(TARGET_SERVER_USER)@$(TARGET_SERVER_IP):/home/$(TARGET_SERVER_USER)/artifact2.txt
   displayName: 'Copy Artifact from SFTP to Target Ubuntu Server'
   env:
     TARGET_SERVER_IP: $(target_server_ip)
     SFTP_SERVER_IP: $(sftp_server_ip)
     TARGET_SERVER_USER: $(target_server_user)
+
