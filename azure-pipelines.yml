@@ -1,16 +1,20 @@
 trigger:
   - main
+
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
+
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
+
 # Step 2: Create an artifact
 - script: |
     echo "Hello World!" > artifact3.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
     mv artifact3.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
+
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -18,22 +22,32 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
+
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
+
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact3.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact3.txt
+      $(Build.ArtifactStagingDirectory)/artifact3.txt sftpuser@$(SFTP_SERVER_IP):/sftp/uploads/artifact3.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
-# Step 6: Copy artifact from SFTP VM to deploymachine VM
+
+# Step 6: Copy artifact from SFTP to deploy machine
 - script: |
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no \
-      /sftp/uploads/artifact3.txt coditas@deploymachine:/home/coditas/
-  displayName: 'Copy Artifact to deploymachine VM'
+    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) "
+      sshpass -p '$(DEPLOY_PASSWORD)' scp -o StrictHostKeyChecking=no /sftp/uploads/artifact3.txt $(DEPLOY_USER)@$(DEPLOY_SERVER_IP):/home/$(DEPLOY_USER)/"
+  displayName: 'Copy Artifact to Deploy Machine'
+  env:
+    SFTP_PASSWORD: $(sftp_password)
+    SFTP_SERVER_IP: $(sftp_server_ip)
+    DEPLOY_USER: coditas
+    DEPLOY_PASSWORD: coditas@1234
+    DEPLOY_SERVER_IP: deploymachine
+
