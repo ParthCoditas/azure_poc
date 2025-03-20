@@ -1,0 +1,32 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+# Step 1: Create artifact
+- script: |
+    echo "Hello World!" > artifact.txt
+  displayName: 'Create Artifact'
+
+# Step 2: Publish artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: 'artifact.txt'
+    ArtifactName: 'my-artifact'
+    publishLocation: 'Container'
+
+# Step 3: Copy artifact to SFTP server
+- script: |
+    # Install sshpass (for password-based auth)
+    sudo apt-get install -y sshpass
+
+    # Copy the artifact using SCP
+    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
+      $(Pipeline.Workspace)/my-artifact/artifact.txt sftpuser@$(SFTP_SERVER_IP):/home/sftpuser/
+  displayName: 'Copy to SFTP Server'
+  env:
+    SFTP_PASSWORD: $(sftp_password)  # Store password securely in Azure DevOps variables
+    SFTP_SERVER_IP: $(sftp_server_ip)  # Store SFTP server IP here
