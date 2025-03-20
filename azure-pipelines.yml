@@ -2,7 +2,7 @@ trigger:
   - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: SelfHostedAgents
 
 steps:
 - checkout: self  # Explicit checkout step
