@@ -2,18 +2,15 @@ trigger:
   - main
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
-
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
-
 # Step 2: Create an artifact
 - script: |
     echo "Hello World!" > artifact.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
     mv artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
-
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -21,37 +18,17 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
-
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
-
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):/sftp/uploads/artifact.txt
+      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
-
-# ------------------- New Steps for Copying from SFTP to Deploy VM -------------------
-
-# Step 6: Ensure azureuser has permissions on the SFTP server
-- script: |
-    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no azureuser@$(SFTP_SERVER_IP) \
-    "sudo chown azureuser:azureuser /sftp/uploads/artifact.txt && sudo chmod 644 /sftp/uploads/artifact.txt"
-  displayName: 'Fix Permissions on SFTP Server for azureuser'
-  env:
-    SFTP_PASSWORD: $(sftp_password)
-    SFTP_SERVER_IP: $(sftp_server_ip)
-
-# Step 7: Copy artifact from SFTP server to Deploy VM using azureuser and coditas
-- script: |
-    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
-  displayName: 'Copy Artifact to Deploy VM'
-  env:
-    SFTP_PASSWORD: $(sftp_password)
