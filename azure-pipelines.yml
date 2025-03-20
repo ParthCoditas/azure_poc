@@ -1,20 +1,16 @@
 trigger:
   - main
-
 pool:
-  name: "SelfHostedAgents"
-
+  name: "SelfHostedAgents"  # Use the correct pool name
 steps:
 # Step 1: Checkout the repository
-- checkout: self
-
+- checkout: self  # Explicit checkout step
 # Step 2: Create an artifact
 - script: |
-    echo "Hello World!" > artifact2.txt 
+    echo "Hello World!" > artifact.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact2.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
-
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -22,48 +18,17 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
-
-# Step 4: Download the artifact
+# Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
-
-# Step 5: Copy the Private Key (serverdeployment_key.pem) to SFTP Server
+# Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.SourcesDirectory)/serverdeployment_key.pem sftpuser@$(SFTP_SERVER_IP):uploads/serverdeployment_key.pem
-  displayName: 'Copy Private Key to SFTP Server'
+      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+  displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
-
-# Step 6: Copy artifact to SFTP server
-- script: |
-    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact2.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt
-  displayName: 'Copy Artifact to SFTP Server'
-  env:
-    SFTP_PASSWORD: $(sftp_password)
-    SFTP_SERVER_IP: $(sftp_server_ip)
-
-# Step 7: Download the SSH Private Key from Secure File
-- task: DownloadSecureFile@1
-  name: targetPemFile
-  displayName: 'Download Target Server SSH Private Key'
-  inputs:
-    secureFile: 'serverdeployment_key.pem'  # Ensure this matches your uploaded secure file in Azure DevOps
-
-# Step 8: Copy artifact from SFTP to Target Ubuntu Server
-- script: |
-    chmod 600 $(Agent.TempDirectory)/serverdeployment_key.pem
-    scp -i $(Agent.TempDirectory)/serverdeployment_key.pem -o StrictHostKeyChecking=no \
-      sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt $(Agent.TempDirectory)/artifact2.txt
-    scp -i $(Agent.TempDirectory)/serverdeployment_key.pem -o StrictHostKeyChecking=no \
-      $(Agent.TempDirectory)/artifact2.txt $(TARGET_SERVER_USER)@$(TARGET_SERVER_IP):/home/$(TARGET_SERVER_USER)/artifact2.txt
-  displayName: 'Copy Artifact from SFTP to Target Ubuntu Server'
-  env:
-    TARGET_SERVER_IP: $(target_server_ip)
-    SFTP_SERVER_IP: $(sftp_server_ip)
-    TARGET_SERVER_USER: $(target_server_user)
