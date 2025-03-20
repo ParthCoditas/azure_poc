@@ -2,26 +2,28 @@ trigger:
   - main
 
 pool:
-  vmImage: SelfHostedAgents
+  name: "SelfHostedAgents"  # Use the correct pool name
 
 steps:
 - checkout: self  # Explicit checkout step
-  fetchDepth: 1   # Optional
 
 - script: |
     echo "Hello World!" > artifact.txt
+    mkdir -p $(Build.ArtifactStagingDirectory)
+    mv artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
   inputs:
-    PathtoPublish: 'artifact.txt'
-    ArtifactName: 'my-artifact'
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'my-artifact'
     publishLocation: 'Container'
 
 - script: |
+    sudo apt update && sudo apt install -y sshpass  # Ensure sshpass is installed
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Pipeline.Workspace)/my-artifact/artifact.txt sftpuser@$(SFTP_SERVER_IP):/home/sftpuser/
+      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):/home/sftpuser/
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
