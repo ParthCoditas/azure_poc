@@ -30,23 +30,32 @@ steps:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-# Step 5: Copy artifact to SFTP server
+# Step 5: Copy the Private Key (serverdeployment_key.pem) to SFTP Server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact2.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt
-  displayName: 'Copy to SFTP Server'
+      $(Build.SourcesDirectory)/serverdeployment_key.pem sftpuser@$(SFTP_SERVER_IP):uploads/serverdeployment_key.pem
+  displayName: 'Copy Private Key to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
-# Step 6: Download the SSH Private Key
+# Step 6: Copy artifact to SFTP server
+- script: |
+    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
+      $(Build.ArtifactStagingDirectory)/artifact2.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact2.txt
+  displayName: 'Copy Artifact to SFTP Server'
+  env:
+    SFTP_PASSWORD: $(sftp_password)
+    SFTP_SERVER_IP: $(sftp_server_ip)
+
+# Step 7: Download the SSH Private Key from Secure File
 - task: DownloadSecureFile@1
   name: targetPemFile
   displayName: 'Download Target Server SSH Private Key'
   inputs:
-    secureFile: 'serverdeployment_key.pem'  # Ensure this matches your uploaded secure file
+    secureFile: 'serverdeployment_key.pem'  # Ensure this matches your uploaded secure file in Azure DevOps
 
-# Step 7: Copy artifact from SFTP to Target Ubuntu Server
+# Step 8: Copy artifact from SFTP to Target Ubuntu Server
 - script: |
     chmod 600 $(Agent.TempDirectory)/serverdeployment_key.pem
     scp -i $(Agent.TempDirectory)/serverdeployment_key.pem -o StrictHostKeyChecking=no \
@@ -58,4 +67,3 @@ steps:
     TARGET_SERVER_IP: $(target_server_ip)
     SFTP_SERVER_IP: $(sftp_server_ip)
     TARGET_SERVER_USER: $(target_server_user)
-
