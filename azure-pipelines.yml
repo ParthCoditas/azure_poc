@@ -1,7 +1,7 @@
 trigger:
   - main
 pool:
-  name: "SelfHostedAgents"  # Use the correct pool name
+  name: "SelfHostedAgents"  # Use the correct pool name here
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
