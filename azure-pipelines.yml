@@ -1,59 +1,28 @@
 trigger:
-  - main
+- main
 
 pool:
-  name: "SelfHostedAgents"  # Ensure the correct agent pool is used
+  vmImage: ubuntu-latest  # Use an Ubuntu-based agent
 
 steps:
-# Step 1: Checkout the repository
-- checkout: self  
-
-# Step 2: Create an artifact
-- script: |
-    echo "Hello World!" > artifact.txt
-    mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact.txt $(Build.ArtifactStagingDirectory)/
-  displayName: 'Create Artifact'
-
-# Step 3: Publish the artifact
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'my-artifact'
-    publishLocation: 'Container'
-
-# Step 4: Download the artifact
-- task: DownloadBuildArtifacts@0
-  displayName: 'Download Artifact'
-  inputs:
-    artifactName: 'my-artifact'
-    downloadPath: '$(Build.ArtifactStagingDirectory)'
-
-# Step 5: Copy artifact to SFTP server
-- script: |
-    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
-  displayName: 'Copy to SFTP Server'
-  env:
-    SFTP_PASSWORD: $(sftp_password)
-    SFTP_SERVER_IP: $(sftp_server_ip)
-
-# Step 6: Download Secure File (Private Key)
 - task: DownloadSecureFile@1
-  name: sshKey
+  name: downloadSFTPKey
+  displayName: "Download SFTP Private Key"
   inputs:
-    secureFile: 'sftpserver_key.pem'
+    secureFile: "sftpserver_key.pem"
 
-# Step 7: Set Correct Permissions for the Private Key
 - script: |
     chmod 600 $(Agent.TempDirectory)/sftpserver_key.pem
-  displayName: 'Setup SSH Private Key'
+    echo "StrictHostKeyChecking no" >> ~/.ssh/config
+  displayName: "Set up SSH Key"
 
-# Step 8: Transfer Artifact to Target Server (52.172.96.181)
 - script: |
-    scp -i $(Agent.TempDirectory)/sftpserver_key.pem \
-      sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
-  displayName: 'Transfer Artifact to Target Server'
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem azureuser@13.71.109.194 "echo 'Connected to SFTP Server!'"
+  displayName: "Test SSH Connection to SFTP Server"
+
+- script: |
+    sudo apt-get update && sudo apt-get install -y sshpass
+    sshpass -p "$(CODITAS_DEPLOY_PASS)" scp /sftp/uploads/file.txt coditas@deploymachine:/home/coditas
+  displayName: "Transfer File to Deploy Machine"
   env:
-    SFTP_SERVER_IP: $(sftp_server_ip)
+    CODITAS_DEPLOY_PASS: $(CODITAS_DEPLOY_PASS)  # Securely stored password
