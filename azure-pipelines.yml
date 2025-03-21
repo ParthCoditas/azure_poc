@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  vmImage: "SelfHostedAgents"  # Use an Ubuntu-based agent
+  vmImage: "SelfHostedAgents"  # Use an Ubuntu-based agent now
 
 steps:
 - task: DownloadSecureFile@1
