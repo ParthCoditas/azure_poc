@@ -28,13 +28,16 @@ steps:
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
       $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
-      echo "path"
-      pwd
-      whoami
+
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+    
+- script: |
 
+      echo "path"
+      pwd
+      whoami
 
 
