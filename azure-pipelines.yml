@@ -34,11 +34,32 @@ steps:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
     
+trigger:
+  - main
+
+pool:
+  name: "SelfHostedAgents"  # Ensure the correct agent pool is used
+
+
+
+# Step 2: Download the Secure File (Private Key)
+- task: DownloadSecureFile@1
+  name: sshKey
+  inputs:
+    secureFile: 'sftpserver_key.pem'
+
+# Step 3: Set Correct Permissions for the Private Key
 - script: |
-    ssh -i ./sftpserver_key.pem azureuser@$(SFTP_SERVER_IP) << EOF
-      scp -i ~/.ssh/id_rsa /sftp/uploads/artifact.txt coditas@$(TARGET_SERVER_IP):/home/coditas/
+    chmod 600 $(sshKey.secureFilePath)
+  displayName: 'Setup SSH Private Key'
+
+# Step 4: Transfer Artifact to Target Server (52.172.96.181)
+- script: |
+    ssh -i $(sshKey.secureFilePath) azureuser@$(SFTP_SERVER_IP) << EOF
+      scp /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
     EOF
   displayName: 'Transfer Artifact to Target Server'
   env:
-    TARGET_SERVER_IP: $(target_server_ip)
+    SFTP_SERVER_IP: $(sftp_server_ip)  # Ensure this variable is set in pipeline variables
+
 
