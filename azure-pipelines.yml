@@ -2,6 +2,7 @@ trigger:
   - main
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
+
 steps:
 - task: DownloadSecureFile@1
   name: downloadSFTPKey
@@ -19,8 +20,15 @@ steps:
   displayName: "Test SSH Connection to SFTP Server"
 
 - script: |
+    if [ ! -f "/sftp/uploads/file.txt" ]; then
+      echo "Error: File '/sftp/uploads/file.txt' not found!" && exit 1
+    fi
+  displayName: "Check if File Exists"
+
+- script: |
     sudo apt-get update && sudo apt-get install -y sshpass
-    sshpass -p "$(CODITAS_DEPLOY_PASS)" scp /sftp/uploads/file.txt coditas@deploymachine:/home/coditas
+    export SSHPASS="$(CODITAS_DEPLOY_PASS)"
+    sshpass -e scp /sftp/uploads/file.txt coditas@deploymachine:/home/coditas
   displayName: "Transfer File to Deploy Machine"
   env:
     CODITAS_DEPLOY_PASS: $(CODITAS_DEPLOY_PASS)
