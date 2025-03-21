@@ -42,8 +42,6 @@ steps:
 
 
 - script: |
-    sshpass -p "$(DEPLOY_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
-  env:
-    DEPLOY_PASSWORD: $(deploy_password)
+    scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
+  displayName: 'Copy to Ubuntu Server'
 
