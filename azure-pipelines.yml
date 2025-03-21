@@ -37,6 +37,8 @@ steps:
 - script: |
     cd ../../
     cd sftp/uploads/
+    sudo -i
+    cd /sftp/uploads
     scp -o StrictHostKeyChecking=no artifact.txt coditas@52.172.96.181:/home/coditas/
   displayName: 'Copy to Deploy Machine'
   env:
