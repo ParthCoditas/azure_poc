@@ -35,7 +35,7 @@ steps:
 
 
 - script: |
-    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << 'EOF'
+    
     sudo -i
     scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
     exit
