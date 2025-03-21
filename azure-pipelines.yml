@@ -1,16 +1,20 @@
 trigger:
   - main
+
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
+
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
+
 # Step 2: Create an artifact
 - script: |
     echo "Hello World!" > artifact.txt5
     mkdir -p $(Build.ArtifactStagingDirectory)
     mv artifact.txt5 $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
+
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -18,12 +22,14 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
+
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
+
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
@@ -32,14 +38,13 @@ steps:
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+
 # Step 6: Copy artifact from SFTP to Deploy Machine
 - script: |
-    sshpass -p "admin" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    get /sftp/uploads/artifact.txt5 artifact.txt5
-    bye
+    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << EOF
+    scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
     EOF
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no artifact.txt5 coditas@52.172.96.181:/home/coditas/
   displayName: 'Copy from SFTP to Deploy Machine'
   env:
-    SFTP_SERVER_IP: $(sftp_server_ip)   # Ensure this variable is set
-
+    SFTP_PASSWORD: $(sftp_password)
+    SFTP_SERVER_IP: $(sftp_server_ip)
