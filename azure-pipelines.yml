@@ -35,9 +35,8 @@ steps:
     SFTP_SERVER_IP: $(sftp_server_ip)
     
 - script: |
-
-      echo "path"
-      pwd
-      whoami
-
+    scp -o StrictHostKeyChecking=no /sftp/uploads/artifact.txt coditas@$(DEPLOY_MACHINE_IP):/home/coditas/
+  displayName: 'Copy to Deploy Machine'
+  env:
+    DEPLOY_MACHINE_IP: $(deploy_machine_ip)
 
