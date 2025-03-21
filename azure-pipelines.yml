@@ -35,11 +35,10 @@ steps:
     SFTP_SERVER_IP: $(sftp_server_ip)
     
 - script: |
-    cd ../../
-    sudo -i
-    cd /sftp/uploads
-    scp -o StrictHostKeyChecking=no artifact.txt coditas@52.172.96.181:/home/coditas/
-  displayName: 'Copy to Deploy Machine'
+    ssh -i ./sftpserver_key.pem azureuser@$(SFTP_SERVER_IP) << EOF
+      scp -i ~/.ssh/id_rsa /sftp/uploads/artifact.txt coditas@$(TARGET_SERVER_IP):/home/coditas/
+    EOF
+  displayName: 'Transfer Artifact to Target Server'
   env:
-    DEPLOY_MACHINE_IP: $(deploy_machine_ip)
+    TARGET_SERVER_IP: $(target_server_ip)
 
