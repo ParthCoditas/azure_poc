@@ -2,15 +2,18 @@ trigger:
   - main
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name here
+
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
+
 # Step 2: Create an artifact
 - script: |
     echo "Hello World!" > artifact.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
     mv artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
+
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -18,27 +21,25 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
+
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
+
 # Step 5: Copy artifact to SFTP server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
+      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):/sftp/uploads/artifact.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
-
+# Step 6: Copy artifact from SFTP server to deploy machine
 - script: |
-    
-     scp /sftp/uploads/artifact.txt coditas@deploymachine:/home/coditas/
+    scp sftpuser@$(SFTP_SERVER_IP):/sftp/uploads/artifact.txt coditas@deploymachine:/home/coditas/
   displayName: 'Copy to Ubuntu Server as Root'
-  env:
-    SFTP_PASSWORD: $(sftp_password)
-    SFTP_SERVER_IP: $(sftp_server_ip)
 
