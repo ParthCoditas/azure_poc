@@ -40,14 +40,14 @@ steps:
     SFTP_SERVER_IP: $(sftp_server_ip)
 
 
-# Step 5: Copy artifact to SFTP server as root
 - script: |
-    ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << 'EOF'
+    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << 'EOF'
     sudo -i
     scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
     exit
     EOF
   displayName: 'Copy to Ubuntu Server as Root'
   env:
+    SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
