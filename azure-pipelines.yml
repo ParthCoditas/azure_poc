@@ -36,10 +36,7 @@ steps:
 
 - script: |
     
-    sudo -i
-    scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
-    exit
-    EOF
+     scp /sftp/uploads/file.txt coditas@deploymachine:/home/coditas/
   displayName: 'Copy to Ubuntu Server as Root'
   env:
     SFTP_PASSWORD: $(sftp_password)
