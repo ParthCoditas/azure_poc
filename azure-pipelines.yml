@@ -39,12 +39,14 @@ steps:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
-# Step 6: Copy artifact from SFTP to Deploy Machine
 - script: |
-    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << EOF
-    scp /sftp/uploads/artifact.txt5 coditas@52.172.96.181:/home/coditas/
+    sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) << EOF
+    get /sftp/uploads/artifact.txt5 artifact.txt5
+    bye
     EOF
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no artifact.txt5 coditas@52.172.96.181:/home/coditas/
   displayName: 'Copy from SFTP to Deploy Machine'
   env:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
+
