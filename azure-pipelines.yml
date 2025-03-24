@@ -1,20 +1,16 @@
 trigger:
   - main
-
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
-
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
-
 # Step 2: Create an artifact with the new name
 - script: |
-    echo "Hello World!" > artifact_coditas.txt
+    echo "Hello World!" > artifact240325.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact_coditas.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact240325.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
-
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -22,30 +18,26 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
-
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
-
-# Step 5: Copy artifact to SFTP server with the new name
+# Step 5: Upload Artifact to SFTP Server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    cd sftp/sftpuser/
-    put $(Build.ArtifactStagingDirectory)/artifact_coditas.txt
+    cd /sftp/sftpuser/
+    put $(Build.ArtifactStagingDirectory)/artifact240325.txt
     exit
     EOF
   displayName: 'Upload Artifact to SFTP Server'
 
-# Step 6: SSH into SFTP Server and Transfer File to Destination Ubuntu VM
 - script: |
-    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    cd sftp/sftpuser/
-    sshpass -p "coditas@1234" scp artifact_coditas.txt coditas@52.172.96.181:/home/coditas/
+    sshpass -p "coditas@1234" ssh -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
+    echo "Successfully logged into the SFTP server!"
+    pwd  
     exit
     EOF
-  displayName: 'Transfer Artifact from SFTP to Destination Ubuntu VM'
-
+  displayName: 'SSH into SFTP Server'
 
