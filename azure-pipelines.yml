@@ -33,11 +33,11 @@ steps:
 # Step 5: Copy artifact to SFTP server with the new name
 
 - script: |
-    sshpass -p "$(SFTP_PASSWORD)" ssh -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) "mkdir -p uploads"
-    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact24032025.txt sftpuser@$(SFTP_SERVER_IP):uploads/
-  displayName: 'Create Directory and Copy to SFTP Server'
-
+    sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
+    put $(Build.ArtifactStagingDirectory)/artifact24032025.txt
+    exit
+    EOF
+  displayName: 'Upload Artifact to SFTP Server'
 
 
 
