@@ -49,11 +49,11 @@ steps:
 # Step 7: SSH into SFTP server and copy artifact.txt to another server
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no sftpuser@13.71.109.194 << 'EOF'
-      cd /sftp/uploads
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no sftpuser@13.71.109.194 "
+      cd /sftp/uploads &&
       ls -lah  # Verify file exists
       scp artifact.txt coditas@52.172.96.181:/home/coditas/
-EOF
+    "
   displayName: "SSH into SFTP Server and Copy File to Another Server"
 
 
