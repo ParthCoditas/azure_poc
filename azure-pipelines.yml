@@ -38,6 +38,7 @@ steps:
     echo "Successfully logged into the SFTP server!"
     cd /sftp/sftpuser/
     ls -l
+    sshpass -p "coditas@1234" scp artifact240325.txt coditas@52.172.96.181:/home/coditas/ "
     exit
     EOF
   displayName: 'SSH into SFTP Server'
