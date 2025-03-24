@@ -34,9 +34,9 @@ steps:
   displayName: 'Upload Artifact to SFTP Server'
 
 - script: |
-    sshpass -p "coditas@1234" ssh -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
+    sshpass -p "coditas@12345" ssh -tt -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
     echo "Successfully logged into the SFTP server!"
-    pwd  
+    pwd 
     exit
     EOF
   displayName: 'SSH into SFTP Server'
