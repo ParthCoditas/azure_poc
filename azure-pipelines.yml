@@ -34,8 +34,8 @@ steps:
 
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    put $(Build.ArtifactStagingDirectory)/artifact24032025.txt
     cd /home/sftpuser/
+    put $(Build.ArtifactStagingDirectory)/artifact24032025.txt
     exit
     EOF
   displayName: 'Upload Artifact to SFTP Server'
