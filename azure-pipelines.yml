@@ -51,3 +51,5 @@ steps:
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
     ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194
   displayName: "SSH into SFTP Server"
+    pwd
+    ls
