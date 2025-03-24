@@ -10,9 +10,9 @@ steps:
 
 # Step 2: Create an artifact with the new name
 - script: |
-    echo "Hello World!" > artifact878828.txt
+    echo "Hello World!" > artifact24032025.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact878828.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact24032025.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 
 # Step 3: Publish the artifact
@@ -33,7 +33,7 @@ steps:
 # Step 5: Copy artifact to SFTP server with the new name
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
-      $(Build.ArtifactStagingDirectory)/artifact878828.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact878828.txt
+      $(Build.ArtifactStagingDirectory)/artifact24032025.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact24032025.txt
   displayName: 'Copy to SFTP Server'
   env:
     SFTP_PASSWORD: $(sftp_password)
@@ -46,14 +46,15 @@ steps:
   inputs:
     secureFile: "sftpserver_key.pem"
 
-# Step 7: SSH into SFTP server and copy artifact878828.txt to another server
+# Step 7: SSH into SFTP server and copy artifact24032025.txt to another server
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
     ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "
       cd /sftp/uploads &&
       ls -lah && 
-      sshpass -p "coditas@1234" scp /sftp/uploads/artifact878828.txt coditas@52.172.96.181:/home/coditas/ "
+      sshpass -p "coditas@1234" scp /sftp/uploads/artifact24032025.txt coditas@52.172.96.181:/home/coditas/ "
   displayName: "SSH into SFTP Server and Copy File to Another Server"
+
 
 
 
