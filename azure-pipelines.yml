@@ -1,16 +1,20 @@
 trigger:
   - main
+
 pool:
   name: "SelfHostedAgents"  # Use the correct pool name
+
 steps:
 # Step 1: Checkout the repository
 - checkout: self  # Explicit checkout step
+
 # Step 2: Create an artifact with the new name
 - script: |
-    echo "Hello World!" > artifact240325.txt
+    echo "Hello World!" > coditas_artifact.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact240325.txt $(Build.ArtifactStagingDirectory)/
+    mv coditas_artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
+
 # Step 3: Publish the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
@@ -18,28 +22,31 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'my-artifact'
     publishLocation: 'Container'
+
 # Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
+
 # Step 5: Upload Artifact to SFTP Server
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
     cd /sftp/sftpuser/
-    put $(Build.ArtifactStagingDirectory)/artifact240325.txt
+    put $(Build.ArtifactStagingDirectory)/coditas_artifact.txt
     exit
     EOF
   displayName: 'Upload Artifact to SFTP Server'
 
+# Step 6: SSH into SFTP Server and Transfer Artifact to Another Server
 - script: |
     sshpass -p "coditas@12345" ssh -tt -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
     echo "Successfully logged into the SFTP server!"
     cd /sftp/sftpuser/
     ls -l
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/artifact24032025.txt coditas@52.172.96.181:/home/coditas/
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/coditas_artifact.txt coditas@52.172.96.181:/home/coditas/
     exit
     EOF
-  displayName: 'SSH into SFTP Server'
+  displayName: 'SSH into SFTP Server and Transfer Artifact'
 
