@@ -36,7 +36,8 @@ steps:
 - script: |
     sshpass -p "coditas@12345" ssh -tt -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
     echo "Successfully logged into the SFTP server!"
-    pwd 
+    cd /sftp/sftpuser/
+    ls -l
     exit
     EOF
   displayName: 'SSH into SFTP Server'
