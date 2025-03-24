@@ -45,6 +45,11 @@ steps:
   displayName: "Download SFTP Private Key"
   inputs:
     secureFile: "sftpserver_key.pem"
+# Step 6: Download SSH Private Key from Secure Files & change dir
+- script: |
+    chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "cd .. && cd .. && cd /sftp/uploads && ls -lah"
+  displayName: "Navigate to /sftp/uploads and List Files"
 
 # Step 7: SSH into the server using the private key
 - script: |
