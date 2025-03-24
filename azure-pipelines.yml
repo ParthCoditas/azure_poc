@@ -23,22 +23,20 @@ steps:
     artifactName: 'my-artifact'
     publishLocation: 'Container'
 
-# Step 4: Download the artifact
+# Step 4: Download the artifact (Ensures it's available on the agent)
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Artifact'
   inputs:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-# Step 5: Copy artifact to SFTP server (Fixed: Use `sftp` instead of `scp`)
+# Step 5: Copy artifact to SFTP server
 - script: |
-    sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    cd uploads
-    put $(Build.ArtifactStagingDirectory)/my-artifact/artifact.txt
-    bye
-    EOF
+    sshpass -p "$(SFTP_PASSWORD)" scp -o StrictHostKeyChecking=no \
+      $(Build.ArtifactStagingDirectory)/artifact.txt sftpuser@$(SFTP_SERVER_IP):uploads/artifact.txt
   displayName: 'Copy to SFTP Server'
   env:
+    SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
 # Step 6: Download SSH Private Key from Secure Files
@@ -48,18 +46,13 @@ steps:
   inputs:
     secureFile: "sftpserver_key.pem"
 
-# Step 7: SSH into SFTP server and copy artifact.txt to another server (Fixed SSH part)
+# Step 7: SSH into SFTP server and copy artifact.txt to another server
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@$(SFTP_SERVER_IP) <<EOF
-      cd /sftp/uploads
-      ls -lah  # Verify file exists
-      sftp -o StrictHostKeyChecking=no coditas@52.172.96.181 <<EOC
-      put artifact.txt /home/coditas/
-      bye
-      EOC
-    EOF
-  displayName: "SSH into SFTP Server and Copy File to Another Server"
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "
+      cd /sftp/uploads &&
+      ls -lah && 
+      sshpass -p "coditas@1234" scp /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
 
 
 
