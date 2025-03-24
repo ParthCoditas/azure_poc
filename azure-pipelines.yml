@@ -10,9 +10,9 @@ steps:
 
 # Step 2: Create an artifact with the new name
 - script: |
-    echo "Hello World!" > artifact240325.txt
+    echo "Hello World!" > artifact_coditas.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv artifact240325.txt $(Build.ArtifactStagingDirectory)/
+    mv artifact_coditas.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 
 # Step 3: Publish the artifact
@@ -30,21 +30,12 @@ steps:
     artifactName: 'my-artifact'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-# Step 5: Upload Artifact to SFTP Server
+# Step 5: Copy artifact to SFTP server with the new name
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
-    cd /sftp/sftpuser/
-    put $(Build.ArtifactStagingDirectory)/artifact240325.txt
+    cd /sftpuser/
+    put $(Build.ArtifactStagingDirectory)/artifact_coditas.txt
     exit
     EOF
   displayName: 'Upload Artifact to SFTP Server'
-
-# Step 6: SSH into SFTP Server and Transfer File to Another Ubuntu VM
-- script: |
-    sshpass -p "coditas@12345" ssh -o StrictHostKeyChecking=no coditas@20.235.147.224 <<EOF
-    cd /sftp/sftpuser/
-    sshpass -p "coditas@1234" scp artifact240325.txt coditas@52.172.96.181:/home/coditas/
-    exit
-    EOF
-  displayName: 'Transfer Artifact from SFTP to Another Ubuntu VM'
 
