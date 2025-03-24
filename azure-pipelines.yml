@@ -46,14 +46,16 @@ steps:
   inputs:
     secureFile: "sftpserver_key.pem"
 
-# Step 7: SSH into the SFTP server and list files
+# Step 7: SSH into SFTP server and copy artifact.txt to another server
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 \
-      "cd /sftp/uploads && ls -lah"
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no \
-     artifact.txt coditas@52.172.96.181:/home/coditas/
-  displayName: "SSH into SFTP Server and List Files"
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no sftpuser@13.71.109.194 << 'EOF'
+      cd /sftp/uploads
+      ls -lah  # Verify file exists
+      scp artifact.txt coditas@52.172.96.181:/home/coditas/
+EOF
+  displayName: "SSH into SFTP Server and Copy File to Another Server"
+
 
 
 
