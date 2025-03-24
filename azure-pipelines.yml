@@ -54,5 +54,9 @@ steps:
 # Step 7: SSH into the server using the private key
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
+# Step 8:copy to another server
+- script: |
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
+  displayName: "Copy artifact.txt to Another Server"
     ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "pwd; ls -lah"
   displayName: "SSH into SFTP Server and Check Directory"
