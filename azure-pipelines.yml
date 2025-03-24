@@ -32,7 +32,7 @@ steps:
 
 # Step 5: Upload Artifact to SFTP Server
 - script: |
-    sshpass -p "admin" sftp -o StrictHostKeyChecking=no sftpuser@20.235.147.224
+    sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
     cd /sftpuser/
     put $(Build.ArtifactStagingDirectory)/coditas_artifact.txt
     exit
