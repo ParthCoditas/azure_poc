@@ -10,9 +10,9 @@ steps:
 
 # Step 2: Create an artifact with the new name
 - script: |
-    echo "Hello World!" > coditas_artifact.txt
+    echo "Hello World!" > 24032025artifact.txt
     mkdir -p $(Build.ArtifactStagingDirectory)
-    mv coditas_artifact.txt $(Build.ArtifactStagingDirectory)/
+    mv 24032025artifact.txt $(Build.ArtifactStagingDirectory)/
   displayName: 'Create Artifact'
 
 # Step 3: Publish the artifact
@@ -34,7 +34,7 @@ steps:
 - script: |
     sshpass -p "$(SFTP_PASSWORD)" sftp -o StrictHostKeyChecking=no sftpuser@$(SFTP_SERVER_IP) <<EOF
     cd /sftpuser/
-    put $(Build.ArtifactStagingDirectory)/coditas_artifact.txt
+    put $(Build.ArtifactStagingDirectory)/24032025artifact.txt
     exit
     EOF
   displayName: 'Upload Artifact to SFTP Server'
@@ -45,8 +45,9 @@ steps:
     echo "Successfully logged into the SFTP server!"
     cd /sftp/sftpuser/
     ls -l
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/coditas_artifact.txt coditas@52.172.96.181:/home/coditas/
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/24032025artifact.txt coditas@52.172.96.181:/home/coditas/
     exit
     EOF
   displayName: 'SSH into SFTP Server and Transfer Artifact'
+
 
