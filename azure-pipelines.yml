@@ -52,7 +52,7 @@ steps:
     ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "
       cd /sftp/uploads &&
       ls -lah && 
-      sshpass -p "coditas@1234" scp /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
+      sshpass -p "coditas@1234" scp /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/ "
 
 
 
