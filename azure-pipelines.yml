@@ -45,18 +45,18 @@ steps:
   displayName: "Download SFTP Private Key"
   inputs:
     secureFile: "sftpserver_key.pem"
-# Step 6: Download SSH Private Key from Secure Files & change dir
+
+# Step 7: SSH into the SFTP server and list files
 - script: |
     chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "cd .. && cd .. && cd /sftp/uploads && ls -lah"
-  displayName: "Navigate to /sftp/uploads and List Files"
+    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 \
+      "cd /sftp/uploads && ls -lah"
+  displayName: "SSH into SFTP Server and List Files"
 
-# Step 7: SSH into the server using the private key
+# Step 8: Copy artifact.txt from SFTP server to another server
 - script: |
-    chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "pwd; ls -lah"
-  displayName: "SSH into SFTP Server and Check Directory"
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
-
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no \
+      /sftp/uploads/artifact.txt coditas@52.172.96.181:/home/coditas/
+  displayName: "Copy artifact.txt to Another Server"
 
 
