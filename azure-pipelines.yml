@@ -39,23 +39,6 @@ steps:
     SFTP_PASSWORD: $(sftp_password)
     SFTP_SERVER_IP: $(sftp_server_ip)
 
-# Step 6: Download SSH Private Key from Secure Files
-- task: DownloadSecureFile@1
-  name: downloadSFTPKey
-  displayName: "Download SFTP Private Key"
-  inputs:
-    secureFile: "sftpserver_key.pem"
-
-# Step 7: SSH into SFTP server and copy artifact24032025.txt to another server
-- script: |
-    chmod 400 $(Agent.TempDirectory)/sftpserver_key.pem
-    ssh -i $(Agent.TempDirectory)/sftpserver_key.pem -o StrictHostKeyChecking=no azureuser@13.71.109.194 "
-      cd /sftp/uploads &&
-      ls -lah && 
-      sshpass -p "coditas@1234" scp /sftp/uploads/artifact24032025.txt coditas@52.172.96.181:/home/coditas/ "
-  displayName: "SSH into SFTP Server and Copy File to Another Server"
-
-
 
 
 
