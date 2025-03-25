@@ -38,7 +38,7 @@ steps:
     echo "Successfully logged into the SFTP server!"
     cd /sftp/sftpuser/
     ls -l
-    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/* coditas@52.172.96.181:/home/coditas/
+    sshpass -p "coditas@1234" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /sftp/sftpuser/* coditas@74.224.91.125:/home/coditas/
     exit
     EOF
   displayName: 'SSH into SFTP Server and Transfer Artifact'
